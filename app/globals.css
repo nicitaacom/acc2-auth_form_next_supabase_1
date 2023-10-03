@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand: 137deg 82% 49%;
+    --background: 0deg 0% 93%;
+    --foreground: 0deg 0% 84%;
+    --title: 0deg 0% 12%;
+    --title-foreground: 0deg 0% 10%;
+    --subTitle: 0deg 0% 40%;
+
+    /* The same colors */
+    --border-color: 0deg 0% 40%; /*subTitle*/
+    --icon-color: 0deg 0% 12%; /* title */
+
+    /* Support colors */
+    --info: 239deg 83% 21%;
+    --warning: 22deg 84% 27%;
+    --danger: 0deg 80% 24%;
+    --success: 118deg 80% 23%;
+  }
+  /* inverted colors (HSL - L) */
+  .dark {
+    --brand: 137deg 82% 51%;
+    --background: 0deg 0% 7%;
+    --foreground: 0deg 0% 16%;
+    --title: 0deg 0% 88%;
+    --title-foreground: 0deg 0% 10%;
+    --subTitle: 0deg 0% 60%;
+
+    /* The same colors */
+    --border-color: 0deg 0% 60%; /*subTitle*/
+    --icon-color: 0deg 0% 88%; /* title */
+
+    /* Support colors */
+    --info: 239deg 83% 79%;
+    --warning: 22deg 84% 73%;
+    --danger: 0deg 80% 76%;
+    --success: 118deg 80% 77%;
+  }
+}
+
+* {
+  border-color: hsl(var(--subTitle));
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: hsl(var(--title));
+}
+
+p,
+span {
+  color: hsl(var(--subTitle));
+}
+
+body {
+  list-style: none;
+  background-color: hsl(var(--background));
+  font-family: "Inter", sans-serif;
+}
+
+#root {
+  display: flex;
+  flex-flow: column;
+  min-height: 100vh;
+}
