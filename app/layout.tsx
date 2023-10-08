@@ -7,7 +7,7 @@ import Layout from "./components/Layout"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "codesandbox project",
+  title: "auth-form-next",
   description: "description",
 }
 

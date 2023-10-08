@@ -1,19 +1,19 @@
-import { LoginButton, LogoutButton } from "./(auth)/login/components"
-import RegisterButton from "./(auth)/login/components/RegisterButton"
-import supabaseServer from "./utils/supabaseServer"
+import { OpenAuthModalButton, UserIcon } from "./components/Navbar/components";
+import { AuthModal } from "./components/ui/Modals/AuthModal";
+import { AuthModalContainer } from "./components/ui/Modals/ModalContainers/AuthModalContainer";
 
-export default async function Home() {
-  //Assuming you already have input with validation - https://codesandbox.io/p/sandbox/input-validation-react-hook-form-solved-ndklv3
-  const {
-    data: { session },
-  } = await supabaseServer.auth.getSession()
+export default function Home() {
+ 
   return (
-    <div>
-      <h1 className="text-2xl text-center">Auth</h1>
-      {session && <p>session</p>}
-      <RegisterButton />
-      <LoginButton />
-      <LogoutButton />
-    </div>
+
+  <nav className="px-8 py-4 flex justify-between items-center gap-x-4">
+    <OpenAuthModalButton/>
+    <UserIcon/>
+
+    <AuthModalContainer>
+      <AuthModal label="Auth"/>
+    </AuthModalContainer>
+  </nav>
+    
   )
 }
