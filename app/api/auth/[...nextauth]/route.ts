@@ -1,4 +1,3 @@
-import { NextApiRequest, NextApiResponse } from 'next'
 import NextAuth, { NextAuthOptions } from 'next-auth'
 
 import FaceitProvider from 'next-auth/providers/faceit'
