@@ -1,7 +1,8 @@
-import NextAuth from "next-auth"
-import FaceitProvider from "next-auth/providers/faceit"
+import { NextApiRequest, NextApiResponse } from 'next'
+import NextAuth, { NextAuthOptions } from 'next-auth'
+import FaceitProvider from 'next-auth/providers/faceit'
 
-export const authOptions = {
+const options: NextAuthOptions = {
   providers: [
     FaceitProvider({
       clientId: process.env.NEXT_PUBLIC_FACEIT_CLIENT_ID,
@@ -10,6 +11,4 @@ export const authOptions = {
   ],
 }
 
-export const handler = NextAuth(authOptions)
-
-export { handler as GET, handler as POST }
+export default (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, options)
