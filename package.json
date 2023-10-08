@@ -1,5 +1,5 @@
 {
-  "name": "codesandbox-project",
+  "name": "codesandbox-auth-form-next",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,12 +10,16 @@
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.8.1",
-    "@supabase/supabase-js": "^2.36.0",
+    "@supabase/supabase-js": "^2.37.0",
     "class-variance-authority": "^0.7.0",
-    "next": "latest",
+    "framer-motion": "^10.16.4",
+    "next": "^13.5.4",
+    "next-auth": "^4.23.2",
     "react": "latest",
     "react-dom": "latest",
+    "react-hook-form": "^7.46.2",
     "react-icons": "^4.11.0",
+    "react-swipeable": "^7.0.1",
     "tailwind-merge": "^1.14.0"
   },
   "devDependencies": {
