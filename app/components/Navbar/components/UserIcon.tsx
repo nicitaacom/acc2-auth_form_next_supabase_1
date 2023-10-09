@@ -1,14 +1,14 @@
 import Image from "next/image"
 
 import {BiUserCircle} from 'react-icons/bi'
-import supabaseServer from "@/utils/supabaseServer"
+import supabaseClient from "@/utils/supabaseClient"
+
+export const dynamic = 'force-dynamic'
 
 export default async function UserIcon () {
   
-
+  const {data} = await supabaseClient.auth.getUser()
   
-    const {data} = await supabaseServer.auth.getUser()
-      
       return (
     <>
     {!data.user ? <BiUserCircle className='cursor-pointer' size={32}/>

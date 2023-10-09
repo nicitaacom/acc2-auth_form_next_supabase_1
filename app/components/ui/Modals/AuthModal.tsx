@@ -92,7 +92,7 @@ export function AuthModal({ label }: AdminModalProps) {
         if (emailSelectError) throw emailSelectError
         if (email && email.length > 0) {
           const { data: user, error: signInError } = await supabaseClient.auth.signInWithPassword({
-            email: email[0].email,
+            email: email[0].email!, //email 100% !== null because email && email.length >0 (thats why I use !)
             password: password,
           })
           if (signInError) throw signInError
@@ -150,7 +150,7 @@ export function AuthModal({ label }: AdminModalProps) {
         setTimeout(() => {
           setResponseMessage(
             <div className="flex flex-row">
-              Don't revice email?&nbsp;
+              Don&apos;t revice email?&nbsp;
               <Timer label="resend in" seconds={60}>
                 <Button type="button" variant="link" onClick={() => resendVerificationEmail(email)}>
                   resend

@@ -7,7 +7,7 @@ import { FiLogOut } from "react-icons/fi"
 import { Button } from "@/components/ui/Button"
 import { useRouter } from "next/navigation"
 
-export default async function LoginButton() {
+export default function LoginButton() {
   const router = useRouter()
 
   async function logout() {
