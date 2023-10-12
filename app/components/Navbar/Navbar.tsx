@@ -1,7 +1,6 @@
 import supabaseServer from "@/utils/supabaseServer"
 import { OpenAuthModalButton, UserIcon } from "./components"
 
-export const dynamic = 'force-dynamic'
 
 export default async function Navbar() {
   const user = await supabaseServer().auth.getUser()
