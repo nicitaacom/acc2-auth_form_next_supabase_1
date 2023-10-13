@@ -12,5 +12,5 @@ only in this case AuthModal.tsx will rendered
 You can check re-render for ModalContainer.tsx by adding in ModalContainer.tsx
 
 ```tsx
-console.log("ModalContainer re-render");
+console.log("ModalContainer re-render")
 ```

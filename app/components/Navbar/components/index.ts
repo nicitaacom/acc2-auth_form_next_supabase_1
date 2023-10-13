@@ -1,4 +1,4 @@
-import OpenAuthModalButton from "./OpenAuthModalButton";
-import UserIcon from "./UserIcon";
+import OpenAuthModalButton from "./OpenAuthModalButton"
+import UserIcon from "./UserIcon"
 
-export {OpenAuthModalButton,UserIcon}
+export { OpenAuthModalButton, UserIcon }

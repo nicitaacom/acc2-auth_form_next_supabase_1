@@ -1,20 +1,34 @@
 import Image from "next/image"
 
-import {BiUserCircle} from 'react-icons/bi'
-import supabaseServer from "@/utils/supabaseServer"
+import { BiUserCircle } from "react-icons/bi"
+import { UserResponse } from "@supabase/supabase-js"
 
-export default async function UserIcon () {
-  
+interface UserIconProps {
+  user: UserResponse
+}
 
-  
-    const {data} = await supabaseServer.auth.getUser()
-      
-      return (
+export default function UserIcon({ user }: UserIconProps) {
+  return (
     <>
-    {!data.user ? <BiUserCircle className='cursor-pointer' size={32}/>
-    :
-     data.user.user_metadata.avatar ?  <Image className="rounded-full cursor-pointer" src={data.user.user_metadata.avatar} alt='profile_picture_url' width={32} height={32}/>
-      : <Image className="rounded-full cursor-pointer" src='/placeholder.jpg' alt='profile_picture_url' width={32} height={32}/> }
+      {!user.data.user?.user_metadata.avatar ? (
+        <BiUserCircle className="cursor-pointer" size={32} />
+      ) : user.data.user?.user_metadata.avatar ? (
+        <Image
+          className="rounded-full cursor-pointer"
+          src={user.data.user?.user_metadata.avatar}
+          alt="profile_picture_url"
+          width={32}
+          height={32}
+        />
+      ) : (
+        <Image
+          className="rounded-full cursor-pointer"
+          src="/placeholder.jpg"
+          alt="profile_picture_url"
+          width={32}
+          height={32}
+        />
+      )}
     </>
-)
+  )
 }

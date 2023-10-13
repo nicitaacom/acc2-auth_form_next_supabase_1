@@ -5,7 +5,7 @@ import supabase from "@/utils/supabaseClient"
 import { Button } from "@/components/ui/Button"
 import { useRouter } from "next/navigation"
 
-export default async function RegisterButton() {
+export default function RegisterButton() {
   const router = useRouter()
 
   async function register() {

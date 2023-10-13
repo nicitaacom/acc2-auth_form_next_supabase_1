@@ -66,7 +66,7 @@ export function AuthModal({ label }: AdminModalProps) {
           displayResponseMessage(<p className="text-success">You are logged in</p>)
           reset()
           router.refresh()
-        } 
+        }
       } catch (error: unknown) {
         if (error instanceof Error) {
           displayResponseMessage(<p className="text-danger">{error.message}</p>)
@@ -92,7 +92,7 @@ export function AuthModal({ label }: AdminModalProps) {
         if (emailSelectError) throw emailSelectError
         if (email && email.length > 0) {
           const { data: user, error: signInError } = await supabaseClient.auth.signInWithPassword({
-            email: email[0].email,
+            email: email[0].email!, //email 100% !== null because email && email.length >0 (thats why I use !)
             password: password,
           })
           if (signInError) throw signInError
@@ -150,7 +150,7 @@ export function AuthModal({ label }: AdminModalProps) {
         setTimeout(() => {
           setResponseMessage(
             <div className="flex flex-row">
-              Don't revice email?&nbsp;
+              Don&apos;t revice email?&nbsp;
               <Timer label="resend in" seconds={60}>
                 <Button type="button" variant="link" onClick={() => resendVerificationEmail(email)}>
                   resend
@@ -180,41 +180,14 @@ export function AuthModal({ label }: AdminModalProps) {
 
   async function resendVerificationEmail(email: string) {
     try {
-       const { error } = await supabaseClient.auth.resend({
-      type: "signup",
-      email: email,
-    })
-    if (error) throw error
-    displayResponseMessage(<p className="text-success">Message resended</p>)
+      const { error } = await supabaseClient.auth.resend({
+        type: "signup",
+        email: email,
+      })
+      if (error) throw error
+      displayResponseMessage(<p className="text-success">Message resended</p>)
     } catch (error) {
-       if (error instanceof Error) {
-        displayResponseMessage(<p className="text-danger">{error.message}</p>)
-        console.error("Login with email - ", error)
-      } else {
-        displayResponseMessage(
-          <p className="text-danger">
-            An unknown error occurred - contact admin
-            <Button href="https://t.me/nicitaacom" variant="link">
-              here
-            </Button>
-          </p>,
-        )
-        console.error("Unknown error - ", error)
-      }
-    }
-   
-  }
-
-  async function recoverPassword(email:string) {
-    try {
-      
-    const {error} = await supabaseClient.auth.resetPasswordForEmail(email, {
-    redirectTo: `${location.origin}/?modal=AuthModal&variant=reset-password`})
-    if (error) throw error
-    displayResponseMessage(<p className="text-success">Check your email</p>)
-
-    } catch (error) {
-       if (error instanceof Error) {
+      if (error instanceof Error) {
         displayResponseMessage(<p className="text-danger">{error.message}</p>)
         console.error("Login with email - ", error)
       } else {
@@ -231,34 +204,58 @@ export function AuthModal({ label }: AdminModalProps) {
     }
   }
 
-  async function resetPassword(password:string) {
+  async function recoverPassword(email: string) {
     try {
-    //TODO - check if this password already belong to current email
-    const {error} = await supabaseClient.auth.updateUser({ password: password })
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: `${location.origin}/?modal=AuthModal&variant=reset-password`,
+      })
+      if (error) throw error
+      displayResponseMessage(<p className="text-success">Check your email</p>)
+    } catch (error) {
+      if (error instanceof Error) {
+        displayResponseMessage(<p className="text-danger">{error.message}</p>)
+        console.error("Login with email - ", error)
+      } else {
+        displayResponseMessage(
+          <p className="text-danger">
+            An unknown error occurred - contact admin
+            <Button href="https://t.me/nicitaacom" variant="link">
+              here
+            </Button>
+          </p>,
+        )
+        console.error("Unknown error - ", error)
+      }
+    }
+  }
+
+  async function resetPassword(password: string) {
+    try {
+      //TODO - check if this password already belong to current email
+      const { error } = await supabaseClient.auth.updateUser({ password: password })
       if (error) throw error
       displayResponseMessage(<p className="text-success">Your password changed</p>)
-      router.push('/')
+      router.push("/")
     } catch (error) {
-  if (error instanceof Error && error.message  === 'New password should be different from the old password.') {
-    displayResponseMessage(<p className="text-danger">Its already your password - enter new one</p>)
-    console.error("Login with email - ", error);
-  } else if (error instanceof Error) {
-    displayResponseMessage(<p className="text-danger">{error.message}</p>);
-    console.error("Login with email - ", error);
-  } else {
-    displayResponseMessage(
-      <p className="text-danger">
-        An unknown error occurred - contact admin
-        <Button href="https://t.me/nicitaacom" variant="link">
-          here
-        </Button>
-      </p>
-    );
-    console.error("Unknown error - ", error);
+      if (error instanceof Error && error.message === "New password should be different from the old password.") {
+        displayResponseMessage(<p className="text-danger">Its already your password - enter new one</p>)
+        console.error("Login with email - ", error)
+      } else if (error instanceof Error) {
+        displayResponseMessage(<p className="text-danger">{error.message}</p>)
+        console.error("Login with email - ", error)
+      } else {
+        displayResponseMessage(
+          <p className="text-danger">
+            An unknown error occurred - contact admin
+            <Button href="https://t.me/nicitaacom" variant="link">
+              here
+            </Button>
+          </p>,
+        )
+        console.error("Unknown error - ", error)
+      }
+    }
   }
-}
-  }
-  
 
   const onSubmit = async (data: FormData) => {
     console.log(data)
@@ -302,109 +299,117 @@ transition-all duration-500`}
           </h1>
         </div>
 
-  {queryParams === 'login' || 'register' || 'recover' ? 
-<>
-        <form className="relative max-w-[450px] w-[75vw] flex flex-col gap-y-2 mb-4" onSubmit={handleSubmit(onSubmit)}>
-          {queryParams === "register" && (
-            <FormInput
-              endIcon={<AiOutlineUser size={24} />}
-              register={register}
-              errors={errors}
-              id="username"
-              label="Username"
-              placeholder="HANTARESpeek"
-              disabled={isSubmitting}
-              required
-            />
-          )}
-          {queryParams !== "login" && queryParams !== 'reset-password' && (
-            <FormInput
-              endIcon={<AiOutlineMail size={24} />}
-              register={register}
-              errors={errors}
-              id="email"
-              label="Email"
-              placeholder="user@big.com"
-              disabled={isSubmitting}
-              required
-            />
-          )}
-          {queryParams === "login" && (
-            <FormInput
-              endIcon={<AiOutlineUser size={24} />}
-              register={register}
-              errors={errors}
-              id="emailOrUsername"
-              label="Email or username"
-              placeholder="HANTARESpeek"
-              disabled={isSubmitting}
-              required
-            />
-          )}
-          {queryParams !== "recover" && (
-            <FormInput
-              endIcon={<AiOutlineLock size={24} />}
-              register={register}
-              errors={errors}
-              id="password"
-              label="Password"
-              type="password"
-              placeholder={queryParams === 'reset-password' ? "NeW-RaNd0m_PasWorD" : "RaNd0m_PasWorD"}
-              disabled={isSubmitting}
-              required
-            />
-          )}
-          {/* LOGIN-BODY-HELP */}
-          <div className="flex justify-between mb-2">
-            <div className={`${(queryParams === "recover" || queryParams === 'reset-password') && "invisible"}`}>
-              {/* 'Remember me' now checkbox do nothing - expected !isChecked 1m jwt - isChecked 3m jwt */}
-              <Checkbox
-                className="bg-background cursor-pointer"
-                label="Remember me"
-                onChange={() => setIsChecked(isChecked => !isChecked)}
-                disabled={isSubmitting}
-                isChecked={isChecked}
-              />
-            </div>
-          {queryParams !== 'register' &&
-            <Button
-              href={`${pathname}?modal=AuthModal&variant=${queryParams === "login" ? "recover" : "login"}`}
-              variant="link">
-              {queryParams === "login" ? "Forgot password?" : "Remember password?"}
-            </Button>}
-          </div>
+        {queryParams === "login" || "register" || "recover" ? (
+          <>
+            <form
+              className="relative max-w-[450px] w-[75vw] flex flex-col gap-y-2 mb-4"
+              onSubmit={handleSubmit(onSubmit)}>
+              {queryParams === "register" && (
+                <FormInput
+                  endIcon={<AiOutlineUser size={24} />}
+                  register={register}
+                  errors={errors}
+                  id="username"
+                  label="Username"
+                  placeholder="HANTARESpeek"
+                  disabled={isSubmitting}
+                  required
+                />
+              )}
+              {queryParams !== "login" && queryParams !== "reset-password" && (
+                <FormInput
+                  endIcon={<AiOutlineMail size={24} />}
+                  register={register}
+                  errors={errors}
+                  id="email"
+                  label="Email"
+                  placeholder="user@big.com"
+                  disabled={isSubmitting}
+                  required
+                />
+              )}
+              {queryParams === "login" && (
+                <FormInput
+                  endIcon={<AiOutlineUser size={24} />}
+                  register={register}
+                  errors={errors}
+                  id="emailOrUsername"
+                  label="Email or username"
+                  placeholder="HANTARESpeek"
+                  disabled={isSubmitting}
+                  required
+                />
+              )}
+              {queryParams !== "recover" && (
+                <FormInput
+                  endIcon={<AiOutlineLock size={24} />}
+                  register={register}
+                  errors={errors}
+                  id="password"
+                  label="Password"
+                  type="password"
+                  placeholder={queryParams === "reset-password" ? "NeW-RaNd0m_PasWorD" : "RaNd0m_PasWorD"}
+                  disabled={isSubmitting}
+                  required
+                />
+              )}
+              {/* LOGIN-BODY-HELP */}
+              <div className="flex justify-between mb-2">
+                <div className={`${(queryParams === "recover" || queryParams === "reset-password") && "invisible"}`}>
+                  {/* 'Remember me' now checkbox do nothing - expected !isChecked 1m jwt - isChecked 3m jwt */}
+                  <Checkbox
+                    className="bg-background cursor-pointer"
+                    label="Remember me"
+                    onChange={() => setIsChecked(isChecked => !isChecked)}
+                    disabled={isSubmitting}
+                    isChecked={isChecked}
+                  />
+                </div>
+                {queryParams !== "register" && (
+                  <Button
+                    href={`${pathname}?modal=AuthModal&variant=${queryParams === "login" ? "recover" : "login"}`}
+                    variant="link">
+                    {queryParams === "login" ? "Forgot password?" : "Remember password?"}
+                  </Button>
+                )}
+              </div>
 
-          <Button variant="default-outline" disabled={isSubmitting}>
-            {queryParams === "login" ? "Login" 
-            : queryParams === "register" ? "Register" :
-              queryParams === 'reset-password' ? "Reset password" : "Send email"}
-          </Button>
-          <div className="flex justify-center text-center">{responseMessage}</div>
-        </form>
+              <Button variant="default-outline" disabled={isSubmitting}>
+                {queryParams === "login"
+                  ? "Login"
+                  : queryParams === "register"
+                  ? "Register"
+                  : queryParams === "reset-password"
+                  ? "Reset password"
+                  : "Send email"}
+              </Button>
+              <div className="flex justify-center text-center">{responseMessage}</div>
+            </form>
 
-        {/* CONTINUE WITH (for login and register only) */}
-        {(queryParams === "login" || queryParams === 'register')  && (
-          <section className="flex flex-col gap-y-4 text-center">
-            <p>or continue with</p>
-            <div
-              className={`grid grid-cols-3 gap-x-2 ${isSubmitting && "opacity-50 cursor-default pointer-events-none"}`}>
-              <ContinueWithButton provider="google" />
-              <ContinueWithButton provider="faceit" />
-              <ContinueWithButton provider="twitter" />
-            </div>
-            <Button
-              className="pr-1"
-              href={`${pathname}?modal=AuthModal&variant=${queryParams === "login" ? "register" : "login"}`}
-              variant="link">
-              {queryParams === "login" ? "Create account" : "Login"}
-            </Button>
-          </section>
+            {/* CONTINUE WITH (for login and register only) */}
+            {(queryParams === "login" || queryParams === "register") && (
+              <section className="flex flex-col gap-y-4 text-center">
+                <p>or continue with</p>
+                <div
+                  className={`grid grid-cols-3 gap-x-2 ${
+                    isSubmitting && "opacity-50 cursor-default pointer-events-none"
+                  }`}>
+                  <ContinueWithButton provider="google" />
+                  <ContinueWithButton provider="faceit" />
+                  <ContinueWithButton provider="twitter" />
+                </div>
+                <Button
+                  className="pr-1"
+                  href={`${pathname}?modal=AuthModal&variant=${queryParams === "login" ? "register" : "login"}`}
+                  variant="link">
+                  {queryParams === "login" ? "Create account" : "Login"}
+                </Button>
+              </section>
+            )}
+          </>
+        ) : (
+          <h1>Now change query params back to &variant=login :) </h1>
         )}
-</> :  <h1>Now change query params back to &variant=login :) </h1>
-
-}
-
-
       </div>
     </ModalContainer>
   )

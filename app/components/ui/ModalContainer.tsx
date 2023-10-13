@@ -41,10 +41,6 @@ export function ModalContainer({ children, modalQuery, className }: ModalContain
     }, 500)
   }, [router, pathname])
 
-  if (!showModal) {
-    return null
-  }
-
   /* for e.stopPropagation when mousedown on modal and mouseup on modalBg */
   const modalBgHandler = useSwipeable({
     onTouchStartOrOnMouseDown: () => {
@@ -59,6 +55,10 @@ export function ModalContainer({ children, modalQuery, className }: ModalContain
     },
     trackMouse: true,
   })
+
+  if (!showModal) {
+    return null
+  }
 
   return (
     <AnimatePresence>
