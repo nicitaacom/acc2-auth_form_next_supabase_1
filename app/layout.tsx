@@ -7,7 +7,7 @@ import Layout from "./components/Layout"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "auth-form-next",
+  title: "auth-form-next-supabase",
   description: "description",
 }
 
