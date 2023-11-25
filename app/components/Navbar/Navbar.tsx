@@ -1,14 +1,17 @@
-import supabaseServer from "@/utils/supabaseServer"
-import { OpenAuthModalButton, UserIcon } from "./components"
+import { SwitchDarkMode } from "../SwitchDarkMode"
+import { UserAvatar } from "./components/UserAvatar"
 
-
-export default async function Navbar() {
-  const user = await supabaseServer().auth.getUser()
-
+export function Navbar() {
   return (
-    <nav className="px-8 py-4 flex justify-between items-center gap-x-4">
-      <OpenAuthModalButton />
-      <UserIcon user={user} />
+    <nav className="flex justify-between gap-x-2 px-4 py-2">
+      {/* LOGO */}
+      <h1 className="text-title font-bold text-2xl">LOGO</h1>
+
+      {/* Buttons */}
+      <div className="flex flex-row gap-x-2 justify-center items-center">
+        <SwitchDarkMode />
+        <UserAvatar />
+      </div>
     </nav>
   )
 }

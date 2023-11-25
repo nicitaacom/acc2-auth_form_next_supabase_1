@@ -2,7 +2,6 @@ import type { Config } from "tailwindcss"
 
 const config: Config = {
   content: ["./app/**/*.{tsx,mdx}"],
-
   theme: {
     fontFamily: {
       primary: ["Inter", "sans-serif"],
@@ -23,6 +22,7 @@ const config: Config = {
         brand: "hsl(var(--brand) / 1)",
         background: "hsl(var(--background) / 1)",
         foreground: "hsl(var(--foreground) / 1)",
+        "foreground-accent": "hsl(var(--foreground-accent) / 1)",
         title: "hsl(var(--title) / 1)",
         "title-foreground": "hsl(var(--title-foreground) / 1)",
         subTitle: "hsl(var(--subTitle) / 1)",
@@ -36,6 +36,7 @@ const config: Config = {
         danger: "hsl(var(--danger) / 1)",
         warning: "hsl(var(--warning) / 1)",
         success: "hsl(var(--success) / 1)",
+        "success-accent": "hsl(var(--success-accent) / 1)",
       },
     },
   },

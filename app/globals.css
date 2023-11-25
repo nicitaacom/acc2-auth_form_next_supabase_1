@@ -2,150 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
+/* if you do any changes here it requires manually changes in Skeleton*/
 @layer base {
   :root {
-    --brand: 137deg 82% 49%;
+    --brand: 137deg 82% 22%; /* 0a6624 */
     --background: 0deg 0% 93%;
     --foreground: 0deg 0% 84%;
+    --foreground-accent: 0deg 0% 75%;
+    --foreground-hover: 0deg 0% 74%; /* for skeleton */
     --title: 0deg 0% 12%;
-    --title-foreground: 0deg 0% 10%;
+    --title-foreground: 0deg 0% 90%;
     --subTitle: 0deg 0% 40%;
 
     /* The same colors */
     --border-color: 0deg 0% 40%; /*subTitle*/
-    --icon-color: 0deg 0% 12%; /* title */
+    --icon-color: 0deg 0% 12%; /* title 1f1f1f */
 
     /* Support colors */
-    --info: 239deg 83% 21%;
+    --info: 219deg 65% 36%;
     --warning: 22deg 84% 27%;
-    --danger: 0deg 80% 24%;
-    --success: 118deg 80% 23%;
+    --danger: 0deg 82% 34%;
+    --success: 118deg 78% 20% /* 0e5b0b */;
+    --success-accent: 109deg 83% 42% /* 18bf12 */;
   }
-  /* inverted colors (HSL - L) */
+  /* I did it using rgb color picker and contrast checker */
   .dark {
-    --brand: 137deg 82% 51%;
+    --brand: 137deg 82% 52%; /* 20e959 */
     --background: 0deg 0% 7%;
     --foreground: 0deg 0% 16%;
+    --foreground-accent: 0deg 0% 25%;
+    --foreground-hover: 0deg 0% 26%; /* for skeleton */
     --title: 0deg 0% 88%;
     --title-foreground: 0deg 0% 10%;
-    --subTitle: 0deg 0% 60%;
+    --subTitle: 0deg 0% 63%;
 
     /* The same colors */
     --border-color: 0deg 0% 60%; /*subTitle*/
-    --icon-color: 0deg 0% 88%; /* title */
+    --icon-color: 0deg 0% 88%; /* title e0e0e0 */
 
     /* Support colors */
-    --info: 239deg 83% 79%;
+    --info: 219deg 83% 65%;
     --warning: 22deg 84% 73%;
-    --danger: 0deg 80% 76%;
-    --success: 118deg 80% 77%;
+    --danger: 0deg 80% 72%;
+    --success: 118deg 80% 78% /* 9df49a */;
+    --success-accent: 120deg 93% 62% /* 499546 */;
   }
 }
 
-* {
-  border-color: hsl(var(--subTitle));
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: hsl(var(--title));
-}
-
-p,
-span {
-  color: hsl(var(--subTitle));
-}
-
-body {
-  list-style: none;
-  background-color: hsl(var(--background));
-  font-family: "Inter", sans-serif;
-}
-
-#root {
-  display: flex;
-  flex-flow: column;
-  min-height: 100vh;
-}
-
-/* Checkbox.tsx */
-.checkbox-container {
-  position: relative;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.checkbox-container input[type="checkbox"] {
-  appearance: none;
-  outline: none;
-  -webkit-appearance: 0;
-  height: 15px;
-  width: 15px;
-  margin: 0px 8px 0px 3px;
-  border-radius: 2px;
-  box-shadow: 1px 1px 3px hsla(0, 0, 0, 1);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.checkbox-container input::before {
-  content: "";
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  width: 8px;
-  height: 8px;
-  border-radius: 0.1em;
-  transform: scale(0);
-  transition: all 0.4s;
-  opacity: 0%;
-  pointer-events: none;
-  background-color: hsl(var(--brand) / 0.5);
-}
-
-.checkbox-container:hover input[type="checkbox"]:not(:checked)::before {
-  transform: scale(3.6);
-  opacity: 10%;
-}
-
-.checkbox-container input[type="checkbox"]:not(:checked)::after {
-  display: none;
-}
-
-.checkbox-container input[type="checkbox"]:not(:checked) {
-  transition: all 0.5s;
-}
-
-.checkbox-container input[type="checkbox"]:checked {
-  transition: all 0.5s;
-}
-
-.checkbox-container input[type="checkbox"]:not(:checked):hover {
-  background-color: hsl(var(--brand) / 0.4);
-}
-
-.checkbox-container input[type="checkbox"]:not(:checked):active {
-  background-color: hsl(var(--brand));
-}
-
-.checkbox-container input[type="checkbox"]:checked {
-  background-color: hsl(var(--brand));
-}
-
-.checkbox-container input[type="checkbox"]:checked:hover {
-  background-color: hsl(var(--brand));
-}
-
-.checkbox-container input[type="checkbox"]:checked:active {
-  background-color: hsl(var(--brand));
-}
-
-.checkbox-container input[type="checkbox"]:checked::after {
-  display: flex;
+html,
+body,
+:root {
+  height: 100%;
 }
