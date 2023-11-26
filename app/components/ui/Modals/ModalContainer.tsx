@@ -89,7 +89,7 @@ export function ModalContainer({
               size={32}
               onClick={closeModal}
             />
-            <div className="flex flex-col gap-y-4 px-4 max-w-[600px]">
+            <div className="flex flex-col gap-y-4 px-4">
               {label && <div className="py-2 text-2xl text-center text-title">{label}</div>}
               {children}
             </div>

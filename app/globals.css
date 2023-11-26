@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
 /* if you do any changes here it requires manually changes in Skeleton*/
 @layer base {
   :root {
@@ -55,4 +53,82 @@ html,
 body,
 :root {
   height: 100%;
+}
+
+/* Checkbox.tsx */
+.checkbox-container {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.checkbox-container input[type="checkbox"] {
+  appearance: none;
+  outline: none;
+  -webkit-appearance: 0;
+  height: 15px;
+  width: 15px;
+  margin: 0px 8px 0px 3px;
+  border-radius: 2px;
+  box-shadow: 1px 1px 3px hsla(0, 0, 0, 1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.checkbox-container input::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 0.1em;
+  transform: scale(0);
+  transition: all 0.4s;
+  opacity: 0%;
+  pointer-events: none;
+  background-color: hsl(var(--brand) / 0.5);
+}
+
+.checkbox-container:hover input[type="checkbox"]:not(:checked)::before {
+  transform: scale(3.6);
+  opacity: 10%;
+}
+
+.checkbox-container input[type="checkbox"]:not(:checked)::after {
+  display: none;
+}
+
+.checkbox-container input[type="checkbox"]:not(:checked) {
+  transition: all 0.5s;
+}
+
+.checkbox-container input[type="checkbox"]:checked {
+  transition: all 0.5s;
+}
+
+.checkbox-container input[type="checkbox"]:not(:checked):hover {
+  background-color: hsl(var(--brand) / 0.4);
+}
+
+.checkbox-container input[type="checkbox"]:not(:checked):active {
+  background-color: hsl(var(--brand));
+}
+
+.checkbox-container input[type="checkbox"]:checked {
+  background-color: hsl(var(--brand));
+}
+
+.checkbox-container input[type="checkbox"]:checked:hover {
+  background-color: hsl(var(--brand));
+}
+
+.checkbox-container input[type="checkbox"]:checked:active {
+  background-color: hsl(var(--brand));
+}
+
+.checkbox-container input[type="checkbox"]:checked::after {
+  display: flex;
 }
