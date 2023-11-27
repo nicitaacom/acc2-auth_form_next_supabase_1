@@ -86,7 +86,8 @@ export function AuthInput({
               startIcon && "pl-9",
               endIcon && "pr-9",
               disabled && "opacity-50 cursor-default pointer-events-none",
-              errors[id] && "focus:ring-rose-500 focus-visible:ring-rose-600"
+              errors[id] && "focus:ring-rose-500 focus-visible:ring-rose-600",
+              className
             )}
             id={id}
             type={type}

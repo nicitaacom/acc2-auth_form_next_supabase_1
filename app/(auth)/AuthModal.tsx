@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button"
 import { twMerge } from "tailwind-merge"
 import Image from "next/image"
 import useDarkMode from "@/store/ui/darkModeStore"
+import { ContinueWithButton } from "./components/ContinueWithButton"
 
 interface FormData {
   email: string
@@ -167,7 +168,37 @@ export function AuthModal() {
                   </Button>
                 )}
               </div>
+              <Button variant="default-outline" disabled={isSubmitting || isEmailSent}>
+                {variant === "login"
+                  ? "Login"
+                  : variant === "register"
+                  ? "Register"
+                  : variant === "recover" || variant === "resetPassword"
+                  ? "Reset password"
+                  : "Send email"}
+              </Button>
             </form>
+            {/* CONTINUE WITH (for login and register only) */}
+            {(variant === "login" || variant === "register") && (
+              <section className="flex flex-col gap-y-4 text-center">
+                <p>or continue with</p>
+                <div
+                  className={`grid grid-cols-3 gap-x-2 ${
+                    isSubmitting && "opacity-50 cursor-default pointer-events-none"
+                  }`}>
+                  <ContinueWithButton provider="google" />
+                  <ContinueWithButton provider="faceit" />
+                  <ContinueWithButton provider="twitter" />
+                </div>
+                <Button
+                  className={twMerge(`pr-1`, isEmailSent && "opacity-50 pointer-events-none cursor-default")}
+                  onClick={() => setVariant(variant === "login" ? "register" : "login")}
+                  variant="link"
+                  disabled={isEmailSent}>
+                  {variant === "login" ? "Create account" : "Login"}
+                </Button>
+              </section>
+            )}
           </>
         ) : variant === "authCompleted" && isAuthCompleted === true ? (
           <div className="text-success flex flex-col justify-center w-full h-[150px]">
