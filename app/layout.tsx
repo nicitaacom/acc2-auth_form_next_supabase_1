@@ -5,6 +5,7 @@ import { Inter } from "next/font/google"
 import { Navbar } from "./components/Navbar/Navbar"
 import { Layout } from "./components/Layout"
 import { ModalsProvider } from "./providers/ModalsProvider"
+import ClientOnly from "./components/ClientOnly"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -16,12 +17,14 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <Layout>
-          <ModalsProvider />
-          <Navbar />
-          {children}
-        </Layout>
+      <body className={inter.className} style={{ backgroundColor: "#202020" }}>
+        <ClientOnly>
+          <Layout>
+            <ModalsProvider />
+            <Navbar />
+            {children}
+          </Layout>
+        </ClientOnly>
       </body>
     </html>
   )

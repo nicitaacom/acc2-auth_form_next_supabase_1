@@ -4,13 +4,19 @@ import { AiOutlineLock, AiOutlineMail, AiOutlineUser } from "react-icons/ai"
 import { AuthInput } from "@/components/ui/Inputs/Validation/AuthInput"
 import { ModalContainer } from "@/components/ui/Modals/ModalContainer"
 import { useAuthModal } from "@/store/ui/authModal"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Checkbox } from "@/components/ui/Checkbox"
 import { Button } from "@/components/ui/Button"
 import { twMerge } from "tailwind-merge"
 import Image from "next/image"
 import useDarkMode from "@/store/ui/darkModeStore"
 import { ContinueWithButton } from "./components/ContinueWithButton"
+import { useRouter } from "next/navigation"
+import axios, { AxiosError } from "axios"
+import { pusherClient } from "@/libs/pusher"
+import { Timer } from "./components"
+import supabaseClient from "@/libs/supabaseClient"
+import { TAPIAuthRegister } from "@/api/auth/register/route"
 
 interface FormData {
   email: string
@@ -21,14 +27,21 @@ interface FormData {
 type Variant = "login" | "register" | "recover" | "resetPassword" | "recoverCompleted" | "authCompleted"
 
 export function AuthModal() {
+  const router = useRouter()
+  const authModal = useAuthModal()
+
   const [isEmailSent, setIsEmailSent] = useState(false)
   const [variant, setVariant] = useState<Variant>("login")
   const [isChecked, setIsChecked] = useState(false)
   const [isAuthCompleted, setIsAuthCompleted] = useState(false)
   const [isRecoverCompleted, setIsRecoverCompleted] = useState(false)
   const { isDarkMode } = useDarkMode()
+  const [responseMessage, setResponseMessage] = useState<React.ReactNode>(<p></p>)
 
-  const nameModal = useAuthModal()
+  //when user submit form and got response message from server
+  function displayResponseMessage(message: React.ReactNode) {
+    setResponseMessage(message)
+  }
 
   const {
     handleSubmit,
@@ -38,6 +51,187 @@ export function AuthModal() {
     getValues,
     reset,
   } = useForm<FormData>()
+
+  //for case when user click 'Forgot password?' or 'Create account' and some data in responseMessage
+  useEffect(() => {
+    setResponseMessage(<p></p>)
+  }, [variant])
+
+  useEffect(() => {
+    //hide response message to prevent overflow because too much errors
+    if (errors.email || errors.password || errors.username) {
+      displayResponseMessage(<p></p>)
+    }
+  }, [errors.email, errors.password, errors.username])
+
+  useEffect(() => {
+    if (isAuthCompleted) setVariant("authCompleted")
+  }, [isAuthCompleted, router])
+
+  // Show 'Auth completed' message if user verified email
+  useEffect(() => {
+    function authCompletedHandler() {
+      setIsAuthCompleted(true)
+      reset()
+      setIsEmailSent(false)
+      setTimeout(() => {
+        // this timeout required to set avatarUrl
+        router.refresh()
+      }, 250)
+    }
+
+    pusherClient.bind("auth:completed", authCompletedHandler)
+    return () => {
+      if (getValues("email")) {
+        pusherClient.unsubscribe(getValues("email"))
+      }
+      pusherClient.unbind("auth:completed", authCompletedHandler)
+    }
+  }, [getValues, reset, router])
+
+  async function signUp(username: string, email: string, password: string) {
+    try {
+      const signUpResponse = await axios
+        .post("/api/auth/register", {
+          username: username,
+          email: email,
+          password: password,
+        } as TAPIAuthRegister)
+        .catch(error => {
+          throw error
+        })
+
+      setIsEmailSent(true)
+      if (getValues("email")) {
+        // subscribe pusher to email channel to show message like 'auth completed'
+        pusherClient.subscribe(getValues("email"))
+      }
+      setResponseMessage(<p className="text-success">Check your email</p>)
+      setTimeout(() => {
+        setResponseMessage(
+          <div className="flex flex-col">
+            <div className="flex flex-row">
+              <p>Don&apos;t revice email?&nbsp;</p>
+              <Timer label="resend in" seconds={20}>
+                <Button type="button" variant="link" onClick={() => resendVerificationEmail(email)}>
+                  resend
+                </Button>
+              </Timer>
+            </div>
+            <Button
+              className="text-brand"
+              variant="link"
+              type="button"
+              onClick={() => {
+                setIsEmailSent(false)
+                setTimeout(() => {
+                  setFocus("email")
+                }, 50)
+              }}>
+              change email
+            </Button>
+          </div>
+        )
+      }, 5000)
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.data.error === "User exists - check your email\n You might not verified your email") {
+          displayResponseMessage(
+            <div className="flex flex-col justify-center items-center">
+              <p className="text-danger">User exists - check your email</p>
+              <p className="text-danger">You might not verified your email</p>
+            </div>
+          )
+        } else {
+          displayResponseMessage(<p className="text-danger">{error.response?.data.error}</p>)
+        }
+      } else if (error instanceof Error) {
+        displayResponseMessage(<p className="text-danger">{error.message}</p>)
+      } else {
+        displayResponseMessage(
+          <div className="text-danger flex flex-row">
+            <p>An unknown error occurred - contact admin&nbsp;</p>
+            <Button className="text-info" href="https://t.me/nicitaacom" variant="link">
+              here
+            </Button>
+          </div>
+        )
+      }
+    }
+  }
+
+  async function resendVerificationEmail(email: string) {
+    try {
+      const { error: resendError } = await supabaseClient.auth.resend({
+        type: "signup",
+        email: email,
+        options: {
+          emailRedirectTo: `${location.origin}/auth/callback/credentials`,
+        },
+      })
+      if (resendError) throw resendError
+
+      displayResponseMessage(
+        <div className="flex flex-col">
+          <div className="text-success flex flex-row justify-center">
+            <p>Email resended -&nbsp;</p>
+            <Button
+              className="text-brand"
+              variant="link"
+              type="button"
+              onClick={() => {
+                setIsEmailSent(false)
+                setTimeout(() => {
+                  setFocus("email")
+                }, 50)
+              }}>
+              change email
+            </Button>
+          </div>
+          <p>If you don&apos;t recieve an email - check &apos;Spam&apos; and &apos;All mail&apos;</p>
+        </div>
+      )
+    } catch (error) {
+      if (error instanceof Error) {
+        displayResponseMessage(<p className="text-danger">{error.message}</p>)
+      } else {
+        displayResponseMessage(
+          <div className="text-danger flex flex-row">
+            <p>An unknown error occurred - contact admin&nbsp;</p>
+            <Button className="text-info" href="https://t.me/nicitaacom" variant="link">
+              here
+            </Button>
+          </div>
+        )
+      }
+    }
+  }
+
+  function closeModal() {
+    if (isAuthCompleted || isRecoverCompleted) {
+      setVariant("login")
+      setIsAuthCompleted(false)
+      setIsRecoverCompleted(false)
+      displayResponseMessage(<p></p>)
+      authModal.closeModal()
+    } else {
+      authModal.closeModal()
+    }
+  }
+
+  const onSubmit = async (data: FormData) => {
+    if (variant === "login") {
+      // await signInWithPassword(data.email, data.password)
+    } else if (variant === "register") {
+      await signUp(data.username, data.email, data.password)
+    } else if (variant === "recover") {
+      router.refresh()
+      // await recoverPassword(data.email)
+      reset()
+    } else if (variant === "resetPassword") {
+      // resetPassword(data.password)
+    }
+  }
 
   return (
     <ModalContainer
@@ -72,8 +266,8 @@ export function AuthModal() {
         //for auth completed height
         variant === "authCompleted" && "!h-[250px]"
       )}
-      isOpen={nameModal.isOpen}
-      onClose={nameModal.closeModal}>
+      isOpen={authModal.isOpen}
+      onClose={closeModal}>
       <div className="flex flex-col justify-center gap-y-2 mx-auto">
         <div
           className={twMerge(
@@ -118,41 +312,48 @@ export function AuthModal() {
 
         {variant === "login" || variant === "register" || variant === "recover" || variant === "resetPassword" ? (
           <>
-            <form className="relative max-w-[450px] w-[75vw] flex flex-col gap-y-2 mb-4">
-              <AuthInput
-                endIcon={<AiOutlineMail size={24} />}
-                register={register}
-                errors={errors}
-                disabled={isSubmitting || isEmailSent}
-                id="email"
-                type="email"
-                label="Email"
-                placeholder="user@big.com"
-                required
-              />
-              <AuthInput
-                endIcon={<AiOutlineLock size={24} />}
-                register={register}
-                errors={errors}
-                id="password"
-                label="Password"
-                type="password"
-                placeholder={
-                  variant === "register" || variant === "resetPassword" ? "NeW-RaNd0m_PasWorD" : "RaNd0m_PasWorD"
-                }
-                disabled={isSubmitting || isEmailSent}
-                required
-              />
-              <AuthInput
-                endIcon={<AiOutlineUser size={24} />}
-                register={register}
-                errors={errors}
-                id="username"
-                label="Username"
-                placeholder="HANTARESpeek"
-                disabled={isSubmitting || isEmailSent}
-                required
-              />
+            <form
+              className="relative max-w-[450px] w-[75vw] flex flex-col gap-y-2 mb-4"
+              onSubmit={handleSubmit(onSubmit)}>
+              {variant !== "resetPassword" && (
+                <AuthInput
+                  endIcon={<AiOutlineMail size={24} />}
+                  register={register}
+                  errors={errors}
+                  id="email"
+                  label="Email"
+                  placeholder="user@big.com"
+                  disabled={isSubmitting || isEmailSent}
+                  required
+                />
+              )}
+              {variant !== "recover" && (
+                <AuthInput
+                  endIcon={<AiOutlineLock size={24} />}
+                  register={register}
+                  errors={errors}
+                  id="password"
+                  label="Password"
+                  type="password"
+                  placeholder={
+                    variant === "register" || variant === "resetPassword" ? "NeW-RaNd0m_PasWorD" : "RaNd0m_PasWorD"
+                  }
+                  disabled={isSubmitting || isEmailSent}
+                  required
+                />
+              )}
+              {variant === "register" && (
+                <AuthInput
+                  endIcon={<AiOutlineUser size={24} />}
+                  register={register}
+                  errors={errors}
+                  id="username"
+                  label="Username"
+                  placeholder="HANTARESpeek"
+                  disabled={isSubmitting || isEmailSent}
+                  required
+                />
+              )}
               <div className="flex justify-between mb-2">
                 <div className={twMerge(`invisible`, variant === "login" && "visible")}>
                   <Checkbox
@@ -163,12 +364,15 @@ export function AuthModal() {
                   />
                 </div>
                 {variant !== "register" && (
-                  <Button variant="link" onClick={() => setVariant(variant === "login" ? "recover" : "login")}>
+                  <Button
+                    variant="link"
+                    type="button"
+                    onClick={() => setVariant(variant === "login" ? "recover" : "login")}>
                     {variant === "login" ? "Forgot password?" : "Remember password?"}
                   </Button>
                 )}
               </div>
-              <Button variant="default-outline" disabled={isSubmitting || isEmailSent}>
+              <Button variant="default-outline" type="submit" disabled={isSubmitting || isEmailSent}>
                 {variant === "login"
                   ? "Login"
                   : variant === "register"
@@ -177,6 +381,7 @@ export function AuthModal() {
                   ? "Reset password"
                   : "Send email"}
               </Button>
+              <div className="flex justify-center text-center">{responseMessage}</div>
             </form>
             {/* CONTINUE WITH (for login and register only) */}
             {(variant === "login" || variant === "register") && (

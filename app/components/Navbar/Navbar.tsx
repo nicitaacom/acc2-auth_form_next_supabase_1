@@ -1,7 +1,14 @@
+import supabaseServer from "@/libs/supabaseServer"
+
 import { SwitchDarkMode } from "../SwitchDarkMode"
 import { UserAvatar } from "./components/UserAvatar"
+import { UserIcon } from "./components/UserIcon"
 
-export function Navbar() {
+export async function Navbar() {
+  const {
+    data: { user },
+  } = await supabaseServer().auth.getUser()
+
   return (
     <nav className="flex justify-between gap-x-2 px-4 py-2">
       {/* LOGO */}
@@ -10,7 +17,7 @@ export function Navbar() {
       {/* Buttons */}
       <div className="flex flex-row gap-x-2 justify-center items-center">
         <SwitchDarkMode />
-        <UserAvatar />
+        {user ? <UserAvatar /> : <UserIcon />}
       </div>
     </nav>
   )
