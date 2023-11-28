@@ -463,11 +463,11 @@ export function AuthModal() {
       setVariant("login")
       setIsAuthCompleted(false)
       setIsRecoverCompleted(false)
-      displayResponseMessage(<p></p>)
       authModal.closeModal()
     } else {
       authModal.closeModal()
     }
+    displayResponseMessage(<p></p>)
   }
 
   const onSubmit = async (data: FormData) => {
