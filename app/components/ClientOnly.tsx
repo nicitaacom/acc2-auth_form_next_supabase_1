@@ -16,7 +16,7 @@ const ClientOnly: React.FC<ClientOnlyProps> = ({ children }) => {
   if (!hasMounted) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center">
-        <h1 className="text-2xl">loading..</h1>
+        <h1 className="text-2xl text-info">loading..</h1>
       </div>
     )
   }
