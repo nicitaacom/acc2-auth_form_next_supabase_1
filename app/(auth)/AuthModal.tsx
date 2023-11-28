@@ -378,7 +378,18 @@ export function AuthModal() {
       displayResponseMessage(<p className="text-success">Check your email</p>)
     } catch (error) {
       if (error instanceof AxiosError) {
-        displayResponseMessage(<p className="text-danger">{error.response?.data.error}</p>)
+        if (
+          error.response?.data.error === "I don't let you change password without verified email\n Check your email"
+        ) {
+          displayResponseMessage(
+            <div className="flex flex-col justify-center items-center">
+              <p className="text-danger">I don&apos;t let you change password without verified email</p>
+              <p className="text-danger">Check your email</p>
+            </div>
+          )
+        } else if (error instanceof AxiosError) {
+          displayResponseMessage(<p className="text-danger">{error.response?.data.error}</p>)
+        }
       } else if (error instanceof Error) {
         displayResponseMessage(<p className="text-danger">{error.message}</p>)
       } else {
