@@ -4,6 +4,8 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 
+import { getURL } from "@/utils/getURL"
+
 export async function GET(request: Request) {
   // Get code to exchange this code to cookies session in the future
   const requestUrl = new URL(request.url)
@@ -12,7 +14,7 @@ export async function GET(request: Request) {
   // Redirect to error page if supabase throw error on recover
   const error_description = requestUrl.searchParams.get("error_description")
   if (error_description) {
-    return NextResponse.redirect(`${requestUrl.origin}/error?error_description=${error_description}`) //throw error like this
+    return NextResponse.redirect(`${getURL()}error?error_description=${error_description}`) //throw error like this
   }
 
   /* Exchange code for cookies - update row that user confirmed email */
@@ -58,6 +60,6 @@ export async function GET(request: Request) {
     }
   } else {
     const error_description = encodeURIComponent("No user found after exchanging cookies for registration")
-    return NextResponse.redirect(`${requestUrl.origin}/error?error_description=${error_description}`)
+    return NextResponse.redirect(`${getURL()}error?error_description=${error_description}`)
   }
 }

@@ -3,6 +3,8 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 
+import { getURL } from "@/utils/getURL"
+
 export async function GET(request: Request) {
   // get data about code to exchange this code to cookies session
   const requestUrl = new URL(request.url)
@@ -16,7 +18,7 @@ export async function GET(request: Request) {
   const error_description = requestUrl.searchParams.get("error_description")
   if (error_description) {
     const supabase_error_description = encodeURIComponent(error_description)
-    return NextResponse.redirect(`${requestUrl.origin}/error?error_description=${supabase_error_description}`)
+    return NextResponse.redirect(`${getURL()}error?error_description=${supabase_error_description}`)
   }
 
   if (code) {
@@ -97,11 +99,11 @@ export async function GET(request: Request) {
       )
     } else {
       const error_description = encodeURIComponent("No user found after exchanging cookies for registration")
-      return NextResponse.redirect(`${requestUrl.origin}/error?error_description=${error_description}`)
+      return NextResponse.redirect(`${getURL()}error?error_description=${error_description}`)
     }
   } else {
     // TODO - create image on error page for this case
     const error_description = encodeURIComponent("No code found to exchange cookies for session")
-    return NextResponse.redirect(`${requestUrl.origin}/error?error_description=${error_description}`)
+    return NextResponse.redirect(`${getURL()}error?error_description=${error_description}`)
   }
 }
