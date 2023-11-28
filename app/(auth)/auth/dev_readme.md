@@ -49,11 +49,29 @@ In this route I:
 
 ```ts
 useEffect(() => {
-  if (isRecoverCompleted) router.push("?modal=AuthModal&variant=recoverCompleted")
+  if (isRecoverCompleted) setVariant("recoverCompleted")
 
-  function recoverCompletedHandler() {
+  function recoverCompletedHandler(user: User) {
     setIsRecoverCompleted(true)
+    setIsAuthCompleted(false)
+    setIsEmailSent(false)
+    reset()
+    setTimeout(() => {
+      // this timeout required to set avatarUrl from localstorage
+      // you need to trigger setUser() again to update avatarUrl
+      userStore.setUser(
+        user.id,
+        user.user_metadata.username || user.user_metadata.name,
+        user.email!,
+        user.user_metadata.avatar_url ||
+          user?.identities![0]?.identity_data?.avatar_url ||
+          user?.identities![1]?.identity_data?.avatar_url ||
+          ""
+      )
+      router.refresh()
+    }, 250)
   }
+
   pusherClient.bind("recover:completed", recoverCompletedHandler)
   return () => {
     if (getValues("email")) {
@@ -61,12 +79,8 @@ useEffect(() => {
     }
     pusherClient.unbind("recover:completed", recoverCompletedHandler)
   }
-}, [getValues, isRecoverCompleted, router])
-
-const response = await axios.post("api/auth/recover", {
-  email: getCookie("email"),
-  password: password,
-} as TAPIAuthRecover)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [getValues, isRecoverCompleted, reset, router])
 ```
 
 **api/auth/recover/route.ts**

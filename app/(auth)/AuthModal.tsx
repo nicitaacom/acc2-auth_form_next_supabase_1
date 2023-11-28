@@ -1,23 +1,26 @@
+import { useEffect, useState } from "react"
+import Image from "next/image"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
+import { User } from "@supabase/supabase-js"
+import { twMerge } from "tailwind-merge"
+import axios, { AxiosError } from "axios"
 import { AiOutlineLock, AiOutlineMail, AiOutlineUser } from "react-icons/ai"
+import supabaseClient from "@/libs/supabaseClient"
+
+import { TAPIAuthRegister } from "@/api/auth/register/route"
+import { TAPIAuthRecover } from "@/api/auth/recover/route"
+import { TAPIAuthLogin } from "@/api/auth/login/route"
+import { useAuthModal } from "@/store/ui/authModal"
+import { pusherClient } from "@/libs/pusher"
+import useDarkMode from "@/store/ui/darkModeStore"
 
 import { AuthInput } from "@/components/ui/Inputs/Validation/AuthInput"
 import { ModalContainer } from "@/components/ui/Modals/ModalContainer"
-import { useAuthModal } from "@/store/ui/authModal"
-import { useEffect, useState } from "react"
 import { Checkbox } from "@/components/ui/Checkbox"
-import { Button } from "@/components/ui/Button"
-import { twMerge } from "tailwind-merge"
-import Image from "next/image"
-import useDarkMode from "@/store/ui/darkModeStore"
 import { ContinueWithButton } from "./components/ContinueWithButton"
-import { useRouter } from "next/navigation"
-import axios, { AxiosError } from "axios"
-import { pusherClient } from "@/libs/pusher"
+import { Button } from "@/components/ui/Button"
 import { Timer } from "./components"
-import supabaseClient from "@/libs/supabaseClient"
-import { TAPIAuthRegister } from "@/api/auth/register/route"
-import { TAPIAuthLogin } from "@/api/auth/login/route"
 import useUserStore from "@/store/user/userStore"
 
 interface FormData {
@@ -32,6 +35,8 @@ export function AuthModal() {
   const router = useRouter()
   const authModal = useAuthModal()
   const userStore = useUserStore()
+  const param = useSearchParams()?.get("recover")
+  const code = useSearchParams()?.get("code")
 
   const [isEmailSent, setIsEmailSent] = useState(false)
   const [variant, setVariant] = useState<Variant>("login")
@@ -78,7 +83,7 @@ export function AuthModal() {
       reset()
       setIsEmailSent(false)
       setTimeout(() => {
-        // this timeout required to set avatarUrl
+        // this timeout required to set avatarUrl from localstorage
         router.refresh()
       }, 250)
     }
@@ -91,6 +96,49 @@ export function AuthModal() {
       pusherClient.unbind("auth:completed", authCompletedHandler)
     }
   }, [getValues, reset, router])
+
+  // Show 'Recover completed' if user changed password in another window
+  useEffect(() => {
+    if (isRecoverCompleted) setVariant("recoverCompleted")
+
+    function recoverCompletedHandler(user: User) {
+      setIsRecoverCompleted(true)
+      setIsAuthCompleted(false)
+      setIsEmailSent(false)
+      reset()
+      setTimeout(() => {
+        // this timeout required to set avatarUrl from localstorage
+        // you need to trigger setUser() again to update avatarUrl
+        userStore.setUser(
+          user.id,
+          user.user_metadata.username || user.user_metadata.name,
+          user.email!,
+          user.user_metadata.avatar_url ||
+            user?.identities![0]?.identity_data?.avatar_url ||
+            user?.identities![1]?.identity_data?.avatar_url ||
+            ""
+        )
+        router.refresh()
+      }, 250)
+    }
+
+    pusherClient.bind("recover:completed", recoverCompletedHandler)
+    return () => {
+      if (getValues("email")) {
+        pusherClient.unsubscribe(getValues("email"))
+      }
+      pusherClient.unbind("recover:completed", recoverCompletedHandler)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getValues, isRecoverCompleted, reset, router])
+
+  useEffect(() => {
+    if (param === "resetPassword" && code) {
+      setVariant("resetPassword")
+      authModal.openModal()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [param])
 
   async function signInWithPassword(email: string, password: string) {
     try {
@@ -129,7 +177,7 @@ export function AuthModal() {
             user.user?.identities![1]?.identity_data?.avatar_url
         )
         reset()
-        router.refresh() //refresh to show avatarUrl in navbar
+        router.refresh()
 
         displayResponseMessage(
           <div className="text-success flex flex-col justify-center items-center">
@@ -311,6 +359,94 @@ export function AuthModal() {
     }
   }
 
+  async function recoverPassword(email: string) {
+    try {
+      await axios.post("/api/auth/recover", { email: email } as TAPIAuthRecover)
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: `${location.origin}/auth/callback/recover`,
+      })
+      if (error) throw error
+
+      // subscribe pusher to email channel to show message like 'password recovered - stay safe'
+      if (getValues("email")) {
+        pusherClient.subscribe(getValues("email"))
+      }
+
+      // Save email in localstorage to trigger pusher for this channel (api/auth/recover) (expires in 5 min)
+      localStorage.setItem("email", JSON.stringify({ value: email, expires: new Date().getTime() + 5 * 60 * 1000 }))
+
+      displayResponseMessage(<p className="text-success">Check your email</p>)
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        displayResponseMessage(<p className="text-danger">{error.response?.data.error}</p>)
+      } else if (error instanceof Error) {
+        displayResponseMessage(<p className="text-danger">{error.message}</p>)
+      } else {
+        displayResponseMessage(
+          <div className="text-danger flex flex-row">
+            <p>An unknown error occurred - contact admin&nbsp;</p>
+            <Button className="text-info" href="https://t.me/nicitaacom" variant="link">
+              here
+            </Button>
+          </div>
+        )
+      }
+    }
+  }
+
+  async function resetPassword(password: string) {
+    try {
+      // IMP - check in open and closed databases for this password (enterprice)
+      const email = localStorage.getItem("email")
+      const parsedEmail = JSON.parse(email ?? "")
+
+      if (parsedEmail.expires > new Date().getTime()) {
+        const response = await axios.post("api/auth/reset", {
+          email: parsedEmail.value,
+          password: password,
+        } as TAPIAuthRecover)
+
+        userStore.setUser(
+          response.data.user.id,
+          response.data.user.user_metadata.username || response.data.user.user_metadata.name,
+          response.data.user.email,
+          response.data.user.user_metadata.avatar_url ||
+            response.data.user?.identities![0]?.identity_data?.avatar_url ||
+            response.data.user?.identities![1]?.identity_data?.avatar_url ||
+            ""
+        )
+
+        localStorage.removeItem("email") // Remove email from localstorage
+
+        displayResponseMessage(
+          <div className="text-success flex flex-col justify-center items-center">
+            Your password changed - Delete email
+            <Timer label="I close this window in" seconds={5} action={() => window.close()} />
+          </div>
+        )
+      } else {
+        localStorage.removeItem("email") // Remove expired data
+        throw new Error("You session has expired - recover password quicker next time")
+      }
+    } catch (error) {
+      //This is required to show custom error message (check api/dev_readme.md)
+      if (error instanceof AxiosError) {
+        displayResponseMessage(<p className="text-danger">{error.response?.data.error}</p>)
+      } else if (error instanceof Error) {
+        displayResponseMessage(<p className="text-danger">{error.message}</p>)
+      } else {
+        displayResponseMessage(
+          <div className="text-danger flex flex-row">
+            <p>An unknown error occurred - contact admin&nbsp;</p>
+            <Button className="text-info" href="https://t.me/nicitaacom" variant="link">
+              here
+            </Button>
+          </div>
+        )
+      }
+    }
+  }
+
   function closeModal() {
     if (isAuthCompleted || isRecoverCompleted) {
       setVariant("login")
@@ -329,11 +465,11 @@ export function AuthModal() {
     } else if (variant === "register") {
       await signUp(data.username, data.email, data.password)
     } else if (variant === "recover") {
-      router.refresh()
-      // await recoverPassword(data.email)
+      // router.refresh() // TODO - I don't need it - check how it work without it
+      await recoverPassword(data.email)
       reset()
     } else if (variant === "resetPassword") {
-      // resetPassword(data.password)
+      resetPassword(data.password)
     }
   }
 
@@ -347,7 +483,7 @@ export function AuthModal() {
           ? "h-[640px]"
           : variant === "resetPassword"
           ? "h-[310px]"
-          : "h-[290px]",
+          : "h-[300px]",
 
         //for login height when errors x1
         variant === "login" && (errors.email || errors.password) && "!h-[570px]",
