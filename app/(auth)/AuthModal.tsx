@@ -182,7 +182,7 @@ export function AuthModal() {
         displayResponseMessage(
           <div className="text-success flex flex-col justify-center items-center">
             You are logged in - you may close this modal
-            <Timer label="I close this modal in" seconds={5} action={() => router.replace("/")} />
+            <Timer label="I close this modal in" seconds={5} action={authModal.closeModal} />
           </div>
         )
       } else {
