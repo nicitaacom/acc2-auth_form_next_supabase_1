@@ -488,7 +488,6 @@ export function AuthModal() {
     } else if (variant === "recover") {
       // router.refresh() // TODO - I don't need it - check how it work without it
       await recoverPassword(data.email)
-      reset()
     } else if (variant === "resetPassword") {
       resetPassword(data.password)
     }
