@@ -28,7 +28,7 @@ export async function GET(request: Request) {
 
     if (response.data.user && response.data.user.email) {
       const user_id = response?.data.user.id
-      const username = response.data.user.user_metadata.name
+      const username = response.data.user.user_metadata.name || response.data.user.user_metadata.username
       const email = response.data.user.email
       const email_confirmed_at = response.data.user.email_confirmed_at
       const avatarUrl =
