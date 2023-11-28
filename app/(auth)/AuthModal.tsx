@@ -78,10 +78,19 @@ export function AuthModal() {
 
   // Show 'Auth completed' message if user verified email
   useEffect(() => {
-    function authCompletedHandler() {
+    function authCompletedHandler(user: User) {
       setIsAuthCompleted(true)
-      reset()
       setIsEmailSent(false)
+      userStore.setUser(
+        user.id,
+        user.user_metadata.username || user.user_metadata.name,
+        user.email!,
+        user.user_metadata.avatar_url ||
+          user?.identities![0]?.identity_data?.avatar_url ||
+          user?.identities![1]?.identity_data?.avatar_url ||
+          ""
+      )
+      reset()
       setTimeout(() => {
         // this timeout required to set avatarUrl from localstorage
         router.refresh()
@@ -95,6 +104,7 @@ export function AuthModal() {
       }
       pusherClient.unbind("auth:completed", authCompletedHandler)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getValues, reset, router])
 
   // Show 'Recover completed' if user changed password in another window
