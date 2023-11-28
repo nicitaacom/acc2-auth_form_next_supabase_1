@@ -47,7 +47,7 @@ export async function GET(request: Request) {
         .eq("id", response.data.user.id)
 
       // Trigger pusher to 'auth:completed' to show in another tab message like 'Authencication completed - thank you'
-      await pusherServer.trigger(email, "auth:completed", null)
+      await pusherServer.trigger(email, "auth:completed", response.data.user)
 
       return NextResponse.redirect(
         `${requestUrl.origin}/auth/completed?code=${code}
