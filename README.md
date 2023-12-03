@@ -63,34 +63,38 @@ Login in supabase - https://app.supabase.com/sign-in
 
 ![Paste .env](https://i.imgur.com/KI7jpAR.png)
 
-### 2.8 - github
+### 2.8 - github (optional)
 
 ![Go to settings](https://i.imgur.com/vnG4aMh.png)
 
-### 2.9 - github
+### 2.9 - github (optional)
 
 ![Go to developer settings](https://i.imgur.com/eodZM9p.png)
 
-### 2.10 - github
+### 2.10 - github (optional)
 
 ![OAuth Apps](https://i.imgur.com/yjeGtKv.png)
 
-### 2.11 - github
+### 2.11 - github (optional)
 
 ![New OAuth App](https://i.imgur.com/QXuo0kE.png)
 
-### 2.12 - github
+### 2.12 - github (optional)
 
 ![Auth url](https://i.imgur.com/MKmuYnA.png)
 
-### 2.13 - github
+### 2.13 - github (optional)
 
 ![Copy env values](https://i.imgur.com/SIkWyeE.png)
 
-### 2.14 - github
+### 2.14 - github (optional)
 
 ![paste env values](https://i.imgur.com/AaGnCoK.png)
 
-### 2.15 - github
+### 2.15 - github (optional)
 
 ![paste env values](https://i.imgur.com/14lNMKs.png)
+
+### 2.16 - pusher
+
+[![pusher-setup](https://i.imgur.com/1DHNbUg.png)](https://youtu.be/cQ84_VRMiyM?t=3404)
